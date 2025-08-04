@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            padding: 30px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .warehouse-grid {
+            display: grid;
+            gap: 5px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .location-cell {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .location-cell.occupied {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .location-cell.available {
+            background: #f8f9fa;
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+
+        .location-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 Warehouse Management System</h1>
+            <p>Efficiently manage your warehouse operations</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('setup')">Warehouse Setup</button>
+            <button class="nav-tab" onclick="showTab('products')">Products</button>
+            <button class="nav-tab" onclick="showTab('receive')">Receive Items</button>
+            <button class="nav-tab" onclick="showTab('pick')">Pick Items</button>
+            <button class="nav-tab" onclick="showTab('view')">Warehouse View</button>
+            <button class="nav-tab" onclick="showTab('reports')">Reports</button>
+        </div>
+
+        <!-- Warehouse Setup Tab -->
+        <div id="setup" class="tab-content active">
+            <h2>🏗️ Warehouse Configuration</h2>
+            <p>Set up your warehouse dimensions and structure.</p>
+            
+            <div id="setup-alert"></div>
+            
+            <form id="warehouse-form">
+                <div class="form-group">
+                    <label for="warehouse-name">Warehouse Name:</label>
+                    <input type="text" id="warehouse-name" class="form-control" required>
+                </div>
+                
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label for="aisles">Number of Aisles (Horizontal):</label>
+                        <input type="number" id="aisles" class="form-control" min="1" max="20" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tiers">Number of Tiers (Vertical):</label>
+                        <input type="number" id="tiers" class="form-control" min="1" max="20" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Setup Warehouse</button>
+            </form>
+            
+            <div id="current-warehouse" style="margin-top: 30px;"></div>
+        </div>
+
+        <!-- Products Tab -->
+        <div id="products" class="tab-content">
+            <h2>📦 Product Management</h2>
+            <p>Add and manage products in your warehouse.</p>
+            
+            <div id="products-alert"></div>
+            
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Product Name:</label>
+                    <input type="text" id="product-name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-sku">SKU (Stock Keeping Unit):</label>
+                    <input type="text" id="product-sku" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="product-description">Description:</label>
+                    <textarea id="product-description" class="form-control" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Add Product</button>
+            </form>
+            
+            <div id="products-list" style="margin-top: 30px;"></div>
+        </div>
+
+        <!-- Receive Items Tab -->
+        <div id="receive" class="tab-content">
+            <h2>📥 Receive Items</h2>
+            <p>Receive items from dock and place them in available locations.</p>
+            
+            <div id="receive-alert"></div>
+            
+            <form id="receive-form">
+                <div class="form-group">
+                    <label for="receive-product">Select Product:</label>
+                    <select id="receive-product" class="form-control" required>
+                        <option value="">Choose a product...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="receive-quantity">Quantity:</label>
+                    <input type="number" id="receive-quantity" class="form-control" min="1" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Receive Items</button>
+            </form>
+        </div>
+
+        <!-- Pick Items Tab -->
+        <div id="pick" class="tab-content">
+            <h2>📤 Pick Items</h2>
+            <p>Pick items from specific warehouse locations.</p>
+            
+            <div id="pick-alert"></div>
+            
+            <form id="pick-form">
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label for="pick-aisle">Aisle Number:</label>
+                        <input type="number" id="pick-aisle" class="form-control" min="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pick-tier">Tier Number:</label>
+                        <input type="number" id="pick-tier" class="form-control" min="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pick-quantity">Quantity to Pick:</label>
+                    <input type="number" id="pick-quantity" class="form-control" min="1" required>
+                </div>
+                
+                <button type="submit" class="btn btn-warning">Pick Items</button>
+            </form>
+        </div>
+
+        <!-- Warehouse View Tab -->
+        <div id="view" class="tab-content">
+            <h2>🏢 Warehouse Layout</h2>
+            <p>Visual representation of your warehouse with product locations.</p>
+            
+            <div id="warehouse-view" class="warehouse-grid"></div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <h2>📊 Reports & Analytics</h2>
+            <p>View warehouse occupancy and transaction history.</p>
+            
+            <div class="stats-grid" id="occupancy-stats"></div>
+            
+            <h3 style="margin-top: 30px;">Transaction History</h3>
+            <div id="transactions-list"></div>
+        </div>
+    </div>
+
+    <!-- Location Details Modal -->
+    <div id="location-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modal-title">Location Details</h3>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentWarehouse = null;
+        let products = [];
+        let locations = [];
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load data for specific tabs
+            if (tabName === 'view') {
+                loadWarehouseView();
+            } else if (tabName === 'reports') {
+                loadReports();
+            }
+        }
+
+        // API functions
+        async function apiCall(url, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'API call failed');
+                }
+                
+                return result;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Warehouse setup
+        document.getElementById('warehouse-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('warehouse-name').value;
+            const aisles = parseInt(document.getElementById('aisles').value);
+            const tiers = parseInt(document.getElementById('tiers').value);
+            
+            try {
+                await apiCall('/api/warehouse', 'POST', { name, aisles, tiers });
+                showAlert('setup-alert', 'Warehouse setup successfully!', 'success');
+                loadCurrentWarehouse();
+            } catch (error) {
+                showAlert('setup-alert', error.message, 'danger');
+            }
+        });
+
+        // Add product
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('product-name').value;
+            const sku = document.getElementById('product-sku').value;
+            const description = document.getElementById('product-description').value;
+            
+            try {
+                await apiCall('/api/products', 'POST', { name, sku, description });
+                showAlert('products-alert', 'Product added successfully!', 'success');
+                document.getElementById('product-form').reset();
+                loadProducts();
+            } catch (error) {
+                showAlert('products-alert', error.message, 'danger');
+            }
+        });
+
+        // Receive items
+        document.getElementById('receive-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const productId = document.getElementById('receive-product').value;
+            const quantity = parseInt(document.getElementById('receive-quantity').value);
+            
+            try {
+                const result = await apiCall('/api/receive', 'POST', { product_id: parseInt(productId), quantity });
+                showAlert('receive-alert', `${result.message} Location: Aisle ${result.location.aisle}, Tier ${result.location.tier}`, 'success');
+                document.getElementById('receive-form').reset();
+                loadWarehouseView();
+            } catch (error) {
+                showAlert('receive-alert', error.message, 'danger');
+            }
+        });
+
+        // Pick items
+        document.getElementById('pick-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const aisle = parseInt(document.getElementById('pick-aisle').value);
+            const tier = parseInt(document.getElementById('pick-tier').value);
+            const quantity = parseInt(document.getElementById('pick-quantity').value);
+            
+            try {
+                await apiCall('/api/pick', 'POST', { aisle, tier, quantity });
+                showAlert('pick-alert', 'Items picked successfully!', 'success');
+                document.getElementById('pick-form').reset();
+                loadWarehouseView();
+            } catch (error) {
+                showAlert('pick-alert', error.message, 'danger');
+            }
+        });
+
+        // Load current warehouse
+        async function loadCurrentWarehouse() {
+            try {
+                currentWarehouse = await apiCall('/api/warehouse');
+                const container = document.getElementById('current-warehouse');
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        <strong>Current Warehouse:</strong> ${currentWarehouse.name}<br>
+                        <strong>Dimensions:</strong> ${currentWarehouse.aisles} aisles × ${currentWarehouse.tiers} tiers<br>
+                        <strong>Total Locations:</strong> ${currentWarehouse.aisles * currentWarehouse.tiers}
+                    </div>
+                `;
+            } catch (error) {
+                // Warehouse not configured yet
+            }
+        }
+
+        // Load products
+        async function loadProducts() {
+            try {
+                products = await apiCall('/api/products');
+                const container = document.getElementById('products-list');
+                const select = document.getElementById('receive-product');
+                
+                // Update products list
+                if (products.length > 0) {
+                    container.innerHTML = `
+                        <h3>Available Products</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>SKU</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${products.map(p => `
+                                    <tr>
+                                        <td>${p.name}</td>
+                                        <td>${p.sku}</td>
+                                        <td>${p.description || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    container.innerHTML = '<p>No products available. Add some products first.</p>';
+                }
+                
+                // Update select options
+                select.innerHTML = '<option value="">Choose a product...</option>' +
+                    products.map(p => `<option value="${p.id}">${p.name} (${p.sku})</option>`).join('');
+                    
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Load warehouse view
+        async function loadWarehouseView() {
+            try {
+                if (!currentWarehouse) {
+                    await loadCurrentWarehouse();
+                }
+                
+                if (!currentWarehouse) {
+                    document.getElementById('warehouse-view').innerHTML = 
+                        '<div class="alert alert-info">Please setup warehouse first.</div>';
+                    return;
+                }
+                
+                locations = await apiCall('/api/locations');
+                const container = document.getElementById('warehouse-view');
+                
+                // Create grid
+                container.style.gridTemplateColumns = `repeat(${currentWarehouse.aisles}, 1fr)`;
+                container.style.gridTemplateRows = `repeat(${currentWarehouse.tiers}, 1fr)`;
+                
+                container.innerHTML = '';
+                
+                for (let tier = currentWarehouse.tiers; tier >= 1; tier--) {
+                    for (let aisle = 1; aisle <= currentWarehouse.aisles; aisle++) {
+                        const location = locations.find(l => l.aisle === aisle && l.tier === tier);
+                        const cell = document.createElement('div');
+                        cell.className = `location-cell ${location && location.is_occupied ? 'occupied' : 'available'}`;
+                        cell.onclick = () => showLocationDetails(aisle, tier, location);
+                        
+                        if (location && location.is_occupied) {
+                            cell.innerHTML = `
+                                <strong>A${aisle}-T${tier}</strong><br>
+                                <small>${location.product_name}</small><br>
+                                <small>Qty: ${location.quantity}</small>
+                            `;
+                        } else {
+                            cell.innerHTML = `<strong>A${aisle}-T${tier}</strong><br><small>Available</small>`;
+                        }
+                        
+                        container.appendChild(cell);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading warehouse view:', error);
+            }
+        }
+
+        // Load reports
+        async function loadReports() {
+            try {
+                const occupancy = await apiCall('/api/reports/occupancy');
+                const transactions = await apiCall('/api/reports/transactions');
+                
+                // Occupancy stats
+                document.getElementById('occupancy-stats').innerHTML = `
+                    <div class="stat-card">
+                        <h3>${occupancy.total_locations}</h3>
+                        <p>Total Locations</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${occupancy.occupied_locations}</h3>
+                        <p>Occupied Locations</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${occupancy.available_locations}</h3>
+                        <p>Available Locations</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>${occupancy.occupancy_percentage}%</h3>
+                        <p>Occupancy Rate</p>
+                    </div>
+                `;
+                
+                // Transactions
+                const transactionsContainer = document.getElementById('transactions-list');
+                if (transactions.length > 0) {
+                    transactionsContainer.innerHTML = `
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Product</th>
+                                    <th>Location</th>
+                                    <th>Quantity</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${transactions.map(t => `
+                                    <tr>
+                                        <td><span class="btn btn-${t.type === 'receive' ? 'success' : 'warning'}">${t.type}</span></td>
+                                        <td>${t.product_name}</td>
+                                        <td>${t.location}</td>
+                                        <td>${t.quantity}</td>
+                                        <td>${t.timestamp}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    transactionsContainer.innerHTML = '<p>No transactions recorded yet.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading reports:', error);
+            }
+        }
+
+        // Show location details modal
+        function showLocationDetails(aisle, tier, location) {
+            const modal = document.getElementById('location-modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+            
+            title.textContent = `Location A${aisle}-T${tier}`;
+            
+            if (location && location.is_occupied) {
+                content.innerHTML = `
+                    <p><strong>Status:</strong> Occupied</p>
+                    <p><strong>Product:</strong> ${location.product_name}</p>
+                    <p><strong>Quantity:</strong> ${location.quantity}</p>
+                `;
+            } else {
+                content.innerHTML = `
+                    <p><strong>Status:</strong> Available</p>
+                    <p>This location is ready for new items.</p>
+                `;
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('location-modal').style.display = 'none';
+        }
+
+        // Show alert
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // Initialize on page load
+        window.onload = async function() {
+            await loadCurrentWarehouse();
+            await loadProducts();
+        };
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('location-modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html> 
